@@ -12,6 +12,10 @@
 *.map
 *.exp
 
+# Build Files
+*.srec
+*.list
+
 # Precompiled Headers
 *.gch
 *.pch
