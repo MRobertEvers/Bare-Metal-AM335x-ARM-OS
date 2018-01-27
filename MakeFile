@@ -1,8 +1,33 @@
-ARMGNU = arm-eabi
- 
-boot.bin: boot.asm
-	$(ARMGNU)-as boot.asm -o boot.o
-	$(ARMGNU)-ld -T linker.ld boot.o -o boot.elf
-	$(ARMGNU)-objdump -D boot.elf > boot.list
-	$(ARMGNU)-objcopy boot.elf -O srec boot.srec
-	$(ARMGNU)-objcopy boot.elf -O binary boot.bin
+ARMGNU = arm-none-eabi
+
+program_NAME := AM3358Meg_OS
+
+# This is a list of all files in the current directory ending in ".c". The $(wildcard) is a globbing expression. This similar to how the shell expands *.c
+program_C_SRCS := $(wildcard *.c)
+
+program_ASM_SRCS := $(wildcard *.s)
+
+# This names all C object files that we are going to build. It uses a substitution expression, which simply replaces ".c" with ".o"
+program_C_OBJS := ${program_C_SRCS:.c=.o}
+
+program_ASM_OBJS := ${program_ASM_SRCS:.s=.o}
+
+# This is simply a list of all the ".o" files, both from C and C++ source files.
+program_OBJS := $(program_ASM_OBJS) $(program_C_OBJS)
+
+all: $(program_NAME)
+
+$(program_NAME): $(program_OBJS)
+	$(ARMGNU)-ld -nostartfiles -T linker.ld $(program_OBJS) -o $(program_NAME).elf
+	$(ARMGNU)-objcopy -O binary $(program_NAME).elf $(program_NAME)
+	$(ARMGNU)-objdump -D $(program_NAME).elf > $(program_NAME).list
+
+system.o: system.s
+	$(ARMGNU)-as system.s -c -o system.o
+
+main.o: main.c
+	$(ARMGNU)-gcc -nostartfiles main.c -c -o main.o
+	
+
+clean:
+	rm $(program_ASM_OBJS) $(program_C_OBJS) $(program_NAME)
