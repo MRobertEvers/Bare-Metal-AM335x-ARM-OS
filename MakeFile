@@ -1,6 +1,6 @@
 ARMGNU = arm-none-eabi
 
-program_NAME := AM3358Meg_OS
+program_NAME := MegOS
 
 # This is a list of all files in the current directory ending in ".c". The $(wildcard) is a globbing expression. This similar to how the shell expands *.c
 program_C_SRCS := $(wildcard *.c)
@@ -21,6 +21,7 @@ $(program_NAME): $(program_OBJS)
 	$(ARMGNU)-ld -nostartfiles -T linker.ld $(program_OBJS) -o $(program_NAME).elf
 	$(ARMGNU)-objcopy -O binary $(program_NAME).elf $(program_NAME)
 	$(ARMGNU)-objdump -D $(program_NAME).elf > $(program_NAME).list
+	btoi.exe $(program_NAME) $(program_NAME)_ti
 
 system.o: system.s
 	$(ARMGNU)-as system.s -c -o system.o
@@ -30,4 +31,4 @@ main.o: main.c
 	
 
 clean:
-	rm $(program_ASM_OBJS) $(program_C_OBJS) $(program_NAME)
+	rm $(program_ASM_OBJS) $(program_C_OBJS) $(program_NAME) $(program_NAME)_ti
