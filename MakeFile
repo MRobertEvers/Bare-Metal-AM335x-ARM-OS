@@ -31,4 +31,4 @@ main.o: main.c
 	
 
 clean:
-	rm $(program_ASM_OBJS) $(program_C_OBJS) $(program_NAME) $(program_NAME)_ti
+	rm $(program_ASM_OBJS) $(program_C_OBJS) $(program_NAME) $(program_NAME)_ti $(program_NAME).elf $(program_NAME).list
