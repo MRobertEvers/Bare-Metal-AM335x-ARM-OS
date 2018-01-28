@@ -7,17 +7,10 @@
 
 void Register_Write(unsigned int, unsigned int, unsigned int);
 
-static void system_enable_GPIO1(void);
-static void system_enable_GPIO1(void)
-{
-	Register_Write(CM_PER, CM_PER_GPIO1_CLKCTRL, 2);
-}
-
 int main(void) __attribute__ ((section (".text.main")));
 int main(void)
 {
-	int* test_reg = CM_PER + CM_PER_GPIO1_CLKCTRL;
-	*test_reg = 2;
+	Register_Write(CM_PER, CM_PER_GPIO1_CLKCTRL, 2);
 	Register_Write(GPIO1, GPIO_OE, 0);
 	Register_Write(GPIO1, GPIO_DATAOUT, 0xFFFFFFFF);
 	while(1);
