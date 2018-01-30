@@ -1,5 +1,5 @@
 # Bare-Metal-AM335x-ARM-OS
-Bare Metal OS for the PocketBeagle.
+Bare Metal OS for the PocketBeagle. In-Progress.
 
 Notes:
 ======
@@ -19,3 +19,4 @@ Readme formalization to come.
 will put the main function at the first address.
 6. The C compiler calls functions with bl which stores the PC in the lr register. Use bx lr to return from such a function.
 7. The GPIO clock must also be enabled in order for the OE and the DATAOUT registers to work properly.
+8. btoi.exe is a binary used to help me create a bootable image. See [its repository](https://github.com/MRobertEvers/AM335x-Binary-To-Image-Tool).
