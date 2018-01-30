@@ -1,19 +1,19 @@
-ARMGNU = arm-none-eabi
+ARMGNU := arm-none-eabi
+TEMPDIR := build
+SRC := src
 
 program_NAME := MegOS
 
 # This is a list of all files in the current directory ending in ".c". The $(wildcard) is a globbing expression. This similar to how the shell expands *.c
-program_C_SRCS := $(wildcard *.c)
+program_C_SRCS := $(wildcard $(SRC)/*.c)
 
-program_ASM_SRCS := $(wildcard *.s)
+program_ASM_SRCS := $(wildcard $(SRC)/*.s)
 
-# This names all C object files that we are going to build. It uses a substitution expression, which simply replaces ".c" with ".o"
-program_C_OBJS := ${program_C_SRCS:.c=.o}
-
-program_ASM_OBJS := ${program_ASM_SRCS:.s=.o}
+program_SRCS := $(program_C_SRCS) $(program_ASM_SRCS)
 
 # This is simply a list of all the ".o" files, both from C and C++ source files.
-program_OBJS := $(program_ASM_OBJS) $(program_C_OBJS)
+program_OBJS :=  $(patsubst $(SRC)/%.c, $(TEMPDIR)/%.o, $(program_C_SRCS)) \
+                 $(patsubst $(SRC)/%.s, $(TEMPDIR)/%.o, $(program_ASM_SRCS))
 
 all: $(program_NAME)
 
@@ -23,12 +23,11 @@ $(program_NAME): $(program_OBJS)
 	$(ARMGNU)-objdump -D $(program_NAME).elf > $(program_NAME).list
 	btoi.exe $(program_NAME) $(program_NAME)_ti
 
-system.o: system.s
-	$(ARMGNU)-as system.s -c -o system.o
+$(TEMPDIR)/%.o: $(SRC)/%.c
+	$(ARMGNU)-gcc -c $< -o $@
 
-main.o: main.c
-	$(ARMGNU)-gcc -nostartfiles main.c -c -o main.o
+$(TEMPDIR)/%.o: $(SRC)/%.s
+	$(ARMGNU)-as -c $< -o $@
 	
-
 clean:
-	rm $(program_ASM_OBJS) $(program_C_OBJS) $(program_NAME) $(program_NAME)_ti $(program_NAME).elf $(program_NAME).list
+	rm $(program_OBJS) $(program_NAME) $(program_NAME)_ti $(program_NAME).elf $(program_NAME).list
