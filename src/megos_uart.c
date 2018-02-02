@@ -39,159 +39,159 @@
 
 static unsigned int serial_recv( void )
 {
-	// 0x1 indicates At least one data character in the RX FIFO. Sect 19.5.1.19
+    // 0x1 indicates At least one data character in the RX FIFO. Sect 19.5.1.19
     while(Register_Read(UART0_BANK, UART_LSR) & 0x01 != 1);
-	
+    
     return(Register_Read(UART0_BANK, UART_RHR) & 0xFF);
 }
 
 static void serial_send ( unsigned int c )
 {
-	// 0x20 indicates that the transmit hold register is empty.
+    // 0x20 indicates that the transmit hold register is empty.
     while(Register_Read(UART0_BANK, UART_LSR) & 0x20 != 1);
-	
-	Register_Write(UART0_BANK, UART_THR, c);
+    
+    Register_Write(UART0_BANK, UART_THR, c);
 }
 
 static void serial_flush ( void )
 {
-	// Just busy wait for the TX FIFO to empty.
-	// 0x40 indicates that the transmit hold and shift registers are empty.
+    // Just busy wait for the TX FIFO to empty.
+    // 0x40 indicates that the transmit hold and shift registers are empty.
     while(Register_Read(UART0_BANK, UART_LSR) & 0x40 != 1);
 }
 
 static void serial_hex_to_ascii_hex ( unsigned int aiHex )
 {
-	// Since each character when typing a hex number
-	// corresponds to 4 bits. We must grab each chunk of
-	// 4 bits and calculate which character was used to
-	// write that value.
-	// e.g. 0x41. Or 0100 0001.
-	// So look at 0100, which is 0x4. To convert that
-	// to ascii '4', add 0x30. ASCII numbers start at 0x30 with 0.
-	// Since we read the MSB of numbers first, that must be sent first.
+    // Since each character when typing a hex number
+    // corresponds to 4 bits. We must grab each chunk of
+    // 4 bits and calculate which character was used to
+    // write that value.
+    // e.g. 0x41. Or 0100 0001.
+    // So look at 0100, which is 0x4. To convert that
+    // to ascii '4', add 0x30. ASCII numbers start at 0x30 with 0.
+    // Since we read the MSB of numbers first, that must be sent first.
     unsigned char iCharacter = 0;
-	unsigned int iBitShift = 32;
-	while(iBitShift > 0)
-	{
-		iBitShift -= 4;
-		iCharacter = (aiHex >> iBitShift) & 0xF;
-		if(iCharacter > 0x9)
-		{
-			
-			// If the value of the character cannot be represented by
-			// numerals. We need to use A,B,C,D,E, and F from Hex Representation.
-			// ASCII capital letters start at 0x41 (65) with A.
-			// Since A is equal to Decimal 10, we want to add a number to
-			// the character so that it will be ascii 'A'... so 65 - 10 = 55
-			// which is 0x37.
-			iCharacter += 0x37;
-		}
-		else
-		{
-		    // This is a numerals
-			iCharacter += 0x30;
-		}
-		serial_send(iCharacter);
-	}
+    unsigned int iBitShift = 32;
+    while(iBitShift > 0)
+    {
+        iBitShift -= 4;
+        iCharacter = (aiHex >> iBitShift) & 0xF;
+        if(iCharacter > 0x9)
+        {
+            
+            // If the value of the character cannot be represented by
+            // numerals. We need to use A,B,C,D,E, and F from Hex Representation.
+            // ASCII capital letters start at 0x41 (65) with A.
+            // Since A is equal to Decimal 10, we want to add a number to
+            // the character so that it will be ascii 'A'... so 65 - 10 = 55
+            // which is 0x37.
+            iCharacter += 0x37;
+        }
+        else
+        {
+            // This is a numerals
+            iCharacter += 0x30;
+        }
+        serial_send(iCharacter);
+    }
     serial_send(0x0D);
     serial_send(0x0A);
 }
 
 static void serial_software_reset(void)
 {
-	// Perform reset - Set reset bit in SYSC
+    // Perform reset - Set reset bit in SYSC
     Register_Write(UART0_BANK, UART_SYSC,0x2);
-	
-	// 0x1 indicates reset is complete.
+    
+    // 0x1 indicates reset is complete.
     while(Register_Read(UART0_BANK, UART_SYSS) & 0x1 != 1);
 }
 
 static void serial_set_pin_mux_mode(void)
 {
-	// Q: Why do we need to do this?
-	// ANS: In this case, we dont. The Mux mode of these pins is the
-	// correct by default. i.e. The RXD and TXD modes are mode 0 on
-	// their designated pins.
-	// 0x20 turns on receiver nenable explicitly, but that is not necessary,
-	// because it is on by default anyway.
-	Register_Write(MODULE_CONTROL_BANK, CONF_UART0_RXD, 0x20);
-	Register_Write(MODULE_CONTROL_BANK, CONF_UART0_TXD, 0x00);
+    // Q: Why do we need to do this?
+    // ANS: In this case, we dont. The Mux mode of these pins is the
+    // correct by default. i.e. The RXD and TXD modes are mode 0 on
+    // their designated pins.
+    // 0x20 turns on receiver nenable explicitly, but that is not necessary,
+    // because it is on by default anyway.
+    Register_Write(MODULE_CONTROL_BANK, CONF_UART0_RXD, 0x20);
+    Register_Write(MODULE_CONTROL_BANK, CONF_UART0_TXD, 0x00);
 }
 
 // See section 19.2.2 for BAUD values and divisor values
 // This function only works in Config Mode (A/B)
 static void serial_clock_set_baud(void)
 {
-	//From the table in 19.2.2, the divisor that gives baud 115,200
-	// is 26 or 0x1A.
-	
-	// DLL is accessible in both A, B. It contains the LSB of the
-	// LSB of the Baud Clock Divisor.
-	Register_Write(UART0_BANK, UART_DLL, 0x1A);
-	
-	// DLH is accessible in both A, B. It contains the MSB of the
-	// MSB of the Baud Clock Divisor.
-	Register_Write(UART0_BANK, UART_DLH, 0x00);
+    //From the table in 19.2.2, the divisor that gives baud 115,200
+    // is 26 or 0x1A.
+    
+    // DLL is accessible in both A, B. It contains the LSB of the
+    // LSB of the Baud Clock Divisor.
+    Register_Write(UART0_BANK, UART_DLL, 0x1A);
+    
+    // DLH is accessible in both A, B. It contains the MSB of the
+    // MSB of the Baud Clock Divisor.
+    Register_Write(UART0_BANK, UART_DLH, 0x00);
 }
 
 static void serial_clock_enable(void)
 {
-	// UART0 is on the wakeup power domain
-	// Thus look to the CM_WKUP register bank for the UART0 clock
-	// 0x2 Sets the UART0 Clock to enabled mode
-	Register_Write(CM_WKUP_BANK, CM_WKUP_UART0_CLKCTRL, 0x2);
+    // UART0 is on the wakeup power domain
+    // Thus look to the CM_WKUP register bank for the UART0 clock
+    // 0x2 Sets the UART0 Clock to enabled mode
+    Register_Write(CM_WKUP_BANK, CM_WKUP_UART0_CLKCTRL, 0x2);
 }
 
 // This procedure follows section 19.4 of the AM3358 manual.
 void megos_UART0_init(void)
-{	
-	serial_clock_enable();
-	
-	serial_set_pin_mux_mode();
+{   
+    serial_clock_enable();
+    
+    serial_set_pin_mux_mode();
 
-	serial_software_reset();
-	
-	// See section 19.4.1.1.3 (Protocol, Baud Rate,
+    serial_software_reset();
+    
+    // See section 19.4.1.1.3 (Protocol, Baud Rate,
     // and Interrupt Settings) for details. 
-	// 1. Disable UART to access the UARTi.UART_DLL and UARTi.UART_DLH registers:
+    // 1. Disable UART to access the UARTi.UART_DLL and UARTi.UART_DLH registers:
     //    Set the UARTi.UART_MDR1[2:0] MODE_SELECT bit field to 0x7.
-	// This disables the UART.
-	Register_Write(UART0_BANK, UART_MDR1, 0x07);
-	
-	// See 19.3.7.1 of the manual. The LCR controls which mode the module is in
-	// The LCR[7]=1 indicates that we are in a configuration mode. 
-	// Then if LCR=0xBF we are in configuration mode B.
-	// If LCR !=0xBF, we are in configuration mode A.
-	
-	// Enter configuration mode A.
-	Register_Write(UART0_BANK, UART_LCR, 0x80);
-	
-	serial_clock_set_baud();
-	
-	// This can be R/W to in config mode A or OP mode.
-	// Disable modem control
-	Register_Write(UART0_BANK, UART_MCR, 0x00);
-	
-	// This can be WRITTEN to in config mode A or OP mode.
-	// 0x4 clears TX FIFO Queue, 0x2 clears RX FIFO Queue, 
-	// 0x1 Enables 64 byte FIFO Queue (as opposed to 1 byte).
-	Register_Write(UART0_BANK, UART_FCR, 0x07);
-	
-	// Enter configuration mode B.
-	// Register_Write(UART0_BANK, UART_LCR, 0xBF);
-	
-	// Enter OP mode with 8 bit words, 1 stop bit and no parity.
-	Register_Write(UART0_BANK, UART_LCR, 0x03);
-	
-	// Reenable UART 16x mode.
-	Register_Write(UART0_BANK, UART_MDR1, 0x00); 
+    // This disables the UART.
+    Register_Write(UART0_BANK, UART_MDR1, 0x07);
+    
+    // See 19.3.7.1 of the manual. The LCR controls which mode the module is in
+    // The LCR[7]=1 indicates that we are in a configuration mode. 
+    // Then if LCR=0xBF we are in configuration mode B.
+    // If LCR !=0xBF, we are in configuration mode A.
+    
+    // Enter configuration mode A.
+    Register_Write(UART0_BANK, UART_LCR, 0x80);
+    
+    serial_clock_set_baud();
+    
+    // This can be R/W to in config mode A or OP mode.
+    // Disable modem control
+    Register_Write(UART0_BANK, UART_MCR, 0x00);
+    
+    // This can be WRITTEN to in config mode A or OP mode.
+    // 0x4 clears TX FIFO Queue, 0x2 clears RX FIFO Queue, 
+    // 0x1 Enables 64 byte FIFO Queue (as opposed to 1 byte).
+    Register_Write(UART0_BANK, UART_FCR, 0x07);
+    
+    // Enter configuration mode B.
+    // Register_Write(UART0_BANK, UART_LCR, 0xBF);
+    
+    // Enter OP mode with 8 bit words, 1 stop bit and no parity.
+    Register_Write(UART0_BANK, UART_LCR, 0x03);
+    
+    // Reenable UART 16x mode.
+    Register_Write(UART0_BANK, UART_MDR1, 0x00); 
 }
 
 int megos_UART0_test(void)
 {
     megos_UART0_init();
-	serial_flush();
+    serial_flush();
     serial_hex_to_ascii_hex(0x12345678);
 
     serial_send(0x0D);
