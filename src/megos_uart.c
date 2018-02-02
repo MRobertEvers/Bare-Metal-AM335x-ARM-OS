@@ -143,6 +143,12 @@ static void serial_clock_enable(void)
     Register_Write(CM_WKUP_BANK, CM_WKUP_UART0_CLKCTRL, 0x2);
 }
 
+static void serial_send_newline(void)
+{
+    serial_send(0x0D);
+    serial_send(0x0A);
+}
+
 // This procedure follows section 19.4 of the AM3358 manual.
 void megos_UART0_init(void)
 {   
@@ -192,16 +198,22 @@ int megos_UART0_test(void)
 {
     megos_UART0_init();
     serial_flush();
+    
     serial_hex_to_ascii_hex(0x12345678);
-
-    serial_send(0x0D);
-    serial_send(0x0A);
-    serial_send('S');
-    serial_send('R');
-    serial_send('E');
-    serial_send('C');
-    serial_send(0x0D);
-    serial_send(0x0A);
+    serial_send_newline();
+    serial_hex_to_ascii_hex(0x9ABCDEF0);
+    serial_send_newline();
+    
+    for(int i = 0; i < 26; i++)
+    {
+        serial_send(i + 0x41);
+    }
+    serial_send_newline();
+    
+    for(int i = 0; i < 26; i++)
+    {
+        serial_send(i + 0x61);
+    }
 
     return 0;
 }
