@@ -8,6 +8,7 @@
 #define USR0 21
 
 #include "system.h"
+#include "utils.h"
 #include "megos_uart.h"
 
 int main(void) __attribute__ ((section (".text.main")));
@@ -15,7 +16,14 @@ int main(void)
 {
     Register_Write(CM_PER, CM_PER_GPIO1_CLKCTRL, 2);
     Register_Write(GPIO1, GPIO_OE, 0);
-    Register_Write(GPIO1, GPIO_DATAOUT, 1 << USR0);
+    while(1)
+    {
+        Register_Write(GPIO1, GPIO_DATAOUT, 1 << USR0);
+        Busy_Wait(0x8000);
+        Register_Write(GPIO1, GPIO_DATAOUT, 0);
+        Busy_Wait(0x8000);
+    }
+
     megos_UART0_test();
     while(1);
 }

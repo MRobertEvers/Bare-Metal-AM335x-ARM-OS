@@ -23,5 +23,3 @@ Register_Read:
     mov r1, r2
     ldr r0, [r0]
     bx  lr
-
-    
