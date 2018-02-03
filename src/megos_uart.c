@@ -1,5 +1,6 @@
 // The start of the UART0 register bank.
 #include "system.h"
+#include "utils.h"
 
 // UART0 is on the wakeup power domain
 // Thus look to the CM_WKUP register bank for the UART0 clock
@@ -207,12 +208,14 @@ int megos_UART0_test(void)
     for(int i = 0; i < 26; i++)
     {
         serial_send(i + 0x41);
+        Busy_Wait(0x300);
     }
     serial_send_newline();
     
     for(int i = 0; i < 26; i++)
     {
         serial_send(i + 0x61);
+        Busy_Wait(0x300);
     }
 
     return 0;
