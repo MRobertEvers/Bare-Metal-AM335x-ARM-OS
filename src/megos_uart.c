@@ -37,28 +37,41 @@
 #define UART_SYSC 0x54 // System configuration register
 #define UART_SYSS 0x58 // System status register
 
+#define MAX_BUFFER_SIZE 120
+
+static unsigned char serial_RX_Buffer[MAX_BUFFER_SIZE];
+static unsigned char serial_RX_Buffer_Index = 0;
 
 static unsigned int serial_recv( void )
 {
     // 0x1 indicates At least one data character in the RX FIFO. Sect 19.5.1.19
-    while(Register_Read(UART0_BANK, UART_LSR) & 0x01 != 1);
+    while(1)
+    {
+        if (Register_Read(UART0_BANK, UART_LSR) & 0x01) break;
+    }
     
-    return(Register_Read(UART0_BANK, UART_RHR) & 0xFF);
+    return (Register_Read(UART0_BANK, UART_RHR) & 0xFF);
 }
 
-static void serial_send ( unsigned int c )
+static void serial_send( unsigned int c )
 {
     // 0x20 indicates that the transmit hold register is empty.
-    while(Register_Read(UART0_BANK, UART_LSR) & 0x20 != 1);
+    while(1)
+    {
+        if (Register_Read(UART0_BANK, UART_LSR) & 0x20) break;
+    }
     
     Register_Write(UART0_BANK, UART_THR, c);
 }
 
-static void serial_flush ( void )
+static void serial_flush( void )
 {
     // Just busy wait for the TX FIFO to empty.
     // 0x40 indicates that the transmit hold and shift registers are empty.
-    while(Register_Read(UART0_BANK, UART_LSR) & 0x40 != 1);
+    while(1)
+    {
+        if (Register_Read(UART0_BANK, UART_LSR) & 0x40) break;
+    }
 }
 
 static void serial_hex_to_ascii_hex ( unsigned int aiHex )
@@ -150,6 +163,21 @@ static void serial_send_newline(void)
     serial_send(0x0A);
 }
 
+void megos_UART0_send_string(char* msg)
+{
+    unsigned int iChar = 0;
+    if( msg == 0 )
+    {
+        return;
+    }
+    
+    while(msg[iChar] != '\0')
+    {
+        serial_send((unsigned char)msg[iChar++]);
+        Busy_Wait(0x10);
+    }
+}
+
 // This procedure follows section 19.4 of the AM3358 manual.
 void megos_UART0_init(void)
 {   
@@ -200,22 +228,35 @@ int megos_UART0_test(void)
     megos_UART0_init();
     serial_flush();
     
-    serial_hex_to_ascii_hex(0x12345678);
-    serial_send_newline();
-    serial_hex_to_ascii_hex(0x9ABCDEF0);
-    serial_send_newline();
+    megos_UART0_send_string("Serial Ready...\0");
     
-    for(int i = 0; i < 26; i++)
+    char c = '\0';
+    while(1)
     {
-        serial_send(i + 0x41);
-        Busy_Wait(0x300);
-    }
-    serial_send_newline();
-    
-    for(int i = 0; i < 26; i++)
-    {
-        serial_send(i + 0x61);
-        Busy_Wait(0x300);
+        c = serial_recv();
+        if( (serial_RX_Buffer_Index < MAX_BUFFER_SIZE) && (c != '\0') )
+        {
+            serial_RX_Buffer[serial_RX_Buffer_Index++] = c; 
+            serial_send(c);
+        }
+        else
+        {
+            megos_UART0_send_string("Serial Buffer Full...\0");
+        }
+
+        // Perform command if new line is entered.
+        if( c == '\r\n' )
+        {
+            megos_UART0_send_string("Message Recved...\0");
+            for(int i = 0; i < serial_RX_Buffer_Index; ++i)
+            {
+                serial_send(serial_RX_Buffer[i]);
+                Busy_Wait(0x10);
+            }
+            
+            serial_RX_Buffer_Index = 0;
+        }
+        c = '\0';
     }
 
     return 0;
