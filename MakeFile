@@ -1,5 +1,7 @@
 ARMGNU := arm-none-eabi
-TEMPDIR := build
+BUILD_DIR := build
+OBJ_DIR := $(BUILD_DIR)/obj
+BIN_DIR := $(BUILD_DIR)/bin
 SRC := src
 
 program_NAME := MegOS
@@ -12,22 +14,27 @@ program_ASM_SRCS := $(wildcard $(SRC)/*.s)
 program_SRCS := $(program_C_SRCS) $(program_ASM_SRCS)
 
 # This is simply a list of all the ".o" files, both from C and C++ source files.
-program_OBJS :=  $(patsubst $(SRC)/%.c, $(TEMPDIR)/%.o, $(program_C_SRCS)) \
-                 $(patsubst $(SRC)/%.s, $(TEMPDIR)/%.o, $(program_ASM_SRCS))
+program_OBJS :=  $(patsubst $(SRC)/%.c, $(OBJ_DIR)/%.o, $(program_C_SRCS)) \
+                 $(patsubst $(SRC)/%.s, $(OBJ_DIR)/%.o, $(program_ASM_SRCS))
 
-all: $(program_NAME)
+
+all: $(BUILD_DIR) $(BIN_DIR) $(OBJ_DIR) $(program_NAME)
+
+$(BUILD_DIR) $(BIN_DIR) $(OBJ_DIR):
+	mkdir $(subst /,\\,$@)
+
 
 $(program_NAME): $(program_OBJS)
-	$(ARMGNU)-ld -nostartfiles -T linker.ld $(program_OBJS) -o $(program_NAME).elf
-	$(ARMGNU)-objcopy -O binary $(program_NAME).elf $(program_NAME)
-	$(ARMGNU)-objdump -D $(program_NAME).elf > $(program_NAME).list
-	btoi.exe $(program_NAME) $(program_NAME)_ti
+	$(ARMGNU)-ld -nostartfiles -T linker.ld $(program_OBJS) -o $(BIN_DIR)/$(program_NAME).elf
+	$(ARMGNU)-objcopy -O binary $(BIN_DIR)/$(program_NAME).elf $(BIN_DIR)/$(program_NAME)
+	$(ARMGNU)-objdump -D $(BIN_DIR)/$(program_NAME).elf > $(BIN_DIR)/$(program_NAME).list
+	btoi.exe $(BIN_DIR)/$(program_NAME) $(BIN_DIR)/$(program_NAME)_ti
 
-$(TEMPDIR)/%.o: $(SRC)/%.c
+$(OBJ_DIR)/%.o: $(SRC)/%.c
 	$(ARMGNU)-gcc -c $< -o $@
 
-$(TEMPDIR)/%.o: $(SRC)/%.s
+$(OBJ_DIR)/%.o: $(SRC)/%.s
 	$(ARMGNU)-as -c $< -o $@
 	
 clean:
-	rm $(program_OBJS) $(program_NAME) $(program_NAME)_ti $(program_NAME).elf $(program_NAME).list
+	rmdir /s /q $(BUILD_DIR)
