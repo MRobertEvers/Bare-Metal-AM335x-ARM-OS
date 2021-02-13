@@ -8,6 +8,25 @@ Download and install the `gcc-arm-none-eabi` toolchain for your platform - ideal
 
 # Notes:
 
+## Power Supply
+
+P1 is a VIN. It takes 5V. The power LED should light up if the board is powered regardless of source.
+
+## Boot Pins
+
+The pocketbeagle board has the boot pins SYSBOOT3, SYSBOOT4 and SYSBOOT14 tied high. See /docs/PocketBeagle_sch.pdf.
+
+This means the boot media check order is (from table 26-7 of the reference manual)
+
+```
+1. SPI
+2. MMC
+3. USB (Doesn't work - see errata)
+4. UART0
+```
+
+## Other
+
 Readme formalization to come.
 
 1. Use <Toolchain>-objcopy -O binary $(program_NAME).elf $(program_NAME) to extract the raw binary from the compiled file. This is necessary to remove all the OS required data.
