@@ -8,6 +8,10 @@ Download and install the `gcc-arm-none-eabi` toolchain for your platform - ideal
 
 # Notes:
 
+## PRU
+
+The PRU has special instructions that GCC doesn't support - you have to use TI's compiler to generate the code for the PRU.
+
 ## Pin Mux
 
 See 9.3.1.50 for register. See datasheet Pin Attributes section for mux pin modes.
