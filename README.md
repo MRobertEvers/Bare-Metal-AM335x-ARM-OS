@@ -8,6 +8,25 @@ Download and install the `gcc-arm-none-eabi` toolchain for your platform - ideal
 
 # Notes:
 
+## Pin Mux
+
+See 9.3.1.50 for register. See datasheet Pin Attributes section for mux pin modes.
+```
+// https://github.com/dawbarton/starterware/blob/master/include/hw/soc_AM335x.h
+#define SOC_CONTROL_REGS                     (0x44E10000)
+// https://e2e.ti.com/support/legacy_forums/embedded/starterware/f/790/t/408080?BeagleBone-Bare-Metal-UART-Driver
+#define CONTROL_CONF_UART_TXD(n) (0x974 + ((n) * 0x10))
+
+// https://e2e.ti.com/support/processors/f/791/t/652913?CCS-AM3354-eHRPWM0B-output-on-GPIO3-15
+#define CONTROL_CONF_MUXMODE(n) (n)
+
+	//*********************************************
+	// UART TXD  = PR1_UART0_TXD
+	//*********************************************
+	HWREG(SOC_CONTROL_REGS + CONTROL_CONF_UART_TXD(1)) = AM335X_PIN_OUTPUT | CONTROL_CONF_MUXMODE(5);
+
+```
+
 ## Power Supply
 
 P1 is a VIN. It takes 5V. The power LED should light up if the board is powered regardless of source.
