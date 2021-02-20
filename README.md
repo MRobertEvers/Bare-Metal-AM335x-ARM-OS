@@ -45,6 +45,8 @@ See 9.3.1.50 for register. See datasheet Pin Attributes section for mux pin mode
 
 TI Starterware has register definitions in `TI/include`. For this chip `soc_AM335x.h`
 
+The PRU UART registers are in section 4.5.5 or the TRM.
+
 ## Power Supply
 
 P1 is a VIN. It takes 5V. The power LED should light up if the board is powered regardless of source.
