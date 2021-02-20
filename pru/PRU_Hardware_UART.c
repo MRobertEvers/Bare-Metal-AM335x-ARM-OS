@@ -31,18 +31,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stdint.h>
-#include <pru_uart.h>
-#include <pru_cfg.h>
+#include "pru_cfg.h"
+#include "pru_uart.h"
 #include "resource_table_empty.h"
+
+#include <stdint.h>
 
 /* The FIFO size on the PRU UART is 16 bytes; however, we are (arbitrarily)
  * only going to send 8 at a time */
-#define FIFO_SIZE	16
-#define MAX_CHARS	8
+#define FIFO_SIZE 16
+#define MAX_CHARS 8
 
 /* This hostBuffer structure is temporary but stores a data buffer */
-struct {
+struct
+{
 	uint8_t msg; // Not used today
 	uint8_t data[FIFO_SIZE];
 } hostBuffer;
@@ -50,9 +52,8 @@ struct {
 /* Making this buffer global will force the received data into memory */
 uint8_t buffer[MAX_CHARS];
 
-
-
-void main(void)
+void
+main(void)
 {
 	uint8_t tx;
 	uint8_t cnt;
@@ -74,7 +75,7 @@ void main(void)
 	 * other bits are configured */
 	/* Enable FIFOs for now at 1-byte, and flush them */
 	CT_UART.FCR = (0x4) | (0x2) | (0x1);
-	//CT_UART.FCR = (0x80) | (0x4) | (0x2) | (0x01); // 8-byte RX FIFO trigger
+	// CT_UART.FCR = (0x80) | (0x4) | (0x2) | (0x01); // 8-byte RX FIFO trigger
 
 	/* Choose desired protocol settings by writing to LCR */
 	/* 8-bit word, 1 stop bit, no parity, no break control and no divisor latch */
@@ -107,17 +108,17 @@ void main(void)
 
 	/*** SEND SOME DATA ***/
 
-	while (1)
+	while( 1 )
 	{
-	    /* Let's send/receive some dummy data */
-	        for (cnt = 0; cnt < 7; cnt++) {
-	            CT_UART.THR = hostBuffer.data[cnt];
+		/* Let's send/receive some dummy data */
+		for( cnt = 0; cnt < 7; cnt++ )
+		{
+			CT_UART.THR = hostBuffer.data[cnt];
 
-	            /* Wait for TX FIFO to be empty */
-	            while (!CT_UART.LSR_bit.THRE){};
-	        }
+			/* Wait for TX FIFO to be empty */
+			while( !CT_UART.LSR_bit.THRE )
+			{
+			};
+		}
 	}
-
-
-
 }
