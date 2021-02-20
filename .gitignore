@@ -1,6 +1,8 @@
 # Build
 /build
 /.vscode
+*/Release
+*/Debug
 
 # Prerequisites
 *.d

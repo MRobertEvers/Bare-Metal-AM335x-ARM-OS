@@ -10,7 +10,7 @@ Download and install the `gcc-arm-none-eabi` toolchain for your platform - ideal
 
 ## PRU
 
-The PRU has special instructions that GCC doesn't support - you have to use TI's compiler to generate the code for the PRU.
+The PRU has special instructions that GCC doesn't support - you have to use TI's compiler to generate the code for the PRU. See the PRU folder for additional information.
 
 ```
 UART 0 PIN MUX
