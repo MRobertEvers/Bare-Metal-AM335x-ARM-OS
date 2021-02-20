@@ -10,4 +10,8 @@
 
 #define USR0 21
 
+#define HWREG(x) (*((volatile unsigned int*)(x)))
+#define SOC_CONTROL_REGS (0x44E10000)
+#define CONTROL_CONF_UART_RXD (0x958)
+#define CONTROL_CONF_UART_TXD (0x95C)
 #endif

@@ -12,10 +12,22 @@ Download and install the `gcc-arm-none-eabi` toolchain for your platform - ideal
 
 The PRU has special instructions that GCC doesn't support - you have to use TI's compiler to generate the code for the PRU.
 
+```
+UART 0 PIN MUX
+SOC_CONTROL_REGS (0x44E10000)
+
+(Pin names from AM3358 datasheet)            - PRU Signal                                  - Control Register (offset from SOC CONTROL REGS)
+SPI0_CS0 (SPI0_CS0 on beagleboard schematic) - pr1_uart0_txd (mux 4 from am3358 datasheet) - (0x958 from TRM)
+SPI0_D1 (SPI0_MOSI on beagleboard schematic) - pr1_uart0_rxd (mux 4 from am3358 datasheet) - (0x95C from TRM)
+```
+
 ## Pin Mux
 
 See 9.3.1.50 for register. See datasheet Pin Attributes section for mux pin modes.
+
 ```
+// ALL OF THESE COME FROM THE TI AM335X STARTERWARE
+
 // https://github.com/dawbarton/starterware/blob/master/include/hw/soc_AM335x.h
 #define SOC_CONTROL_REGS                     (0x44E10000)
 // https://e2e.ti.com/support/legacy_forums/embedded/starterware/f/790/t/408080?BeagleBone-Bare-Metal-UART-Driver
@@ -30,6 +42,8 @@ See 9.3.1.50 for register. See datasheet Pin Attributes section for mux pin mode
 	HWREG(SOC_CONTROL_REGS + CONTROL_CONF_UART_TXD(1)) = AM335X_PIN_OUTPUT | CONTROL_CONF_MUXMODE(5);
 
 ```
+
+TI Starterware has register definitions in `TI/include`. For this chip `soc_AM335x.h`
 
 ## Power Supply
 
