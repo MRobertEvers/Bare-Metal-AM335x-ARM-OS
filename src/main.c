@@ -30,6 +30,15 @@ main(void)
 	megos_UART0_init();
 
 	// *((unsigned int*)(GPIO1 + GPIO_DATAOUT)) = 0;
+
+	// HWREG(SOC_PRM_PER_REGS + CM_PER_L4LS_CLKSTCTRL) |= 0x2; // *((unsigned int*) 0x44E00C00 ) |= 0x2; // reset PRU
+	// HWREG(SOC_PRM_PER_REGS + CM_PER_L4LS_CLKSTCTRL) &= 0xFFFFFFFD; // *((unsigned int*) 0x44E00C00 ) &= 0xFFFFFFFD;
+
+	// HWREG(SOC_CM_PER_REGS + CM_PER_ICSS_CLKCTRL) |=
+	// 	0x02; //*((unsigned int*) 0x44E000E8 ) |= 0x02; // enabling the PRU-ICSS module taking it out of idle
+
+	// HWREG(SOC_PRM_PER_REGS + CM_PER_L4LS_CLKSTCTRL) |= 0x2; // *((unsigned int*) 0x44E00C00 ) |= 0x2; // reset PRU
+	// HWREG(SOC_PRM_PER_REGS + CM_PER_L4LS_CLKSTCTRL) &= 0xFFFFFFFD; // *((unsigned int*) 0x44E00C00 ) &= 0xFFFFFFFD;
 	*((unsigned int*)0x44E00C00) |= 0x2;
 	*((unsigned int*)0x44E00C00) &= 0xFFFFFFFD;
 
