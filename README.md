@@ -8,6 +8,12 @@ Download and install the `gcc-arm-none-eabi` toolchain for your platform - ideal
 
 # Notes:
 
+## Exception Vectors
+
+The AM335x has a special table for the exception vectors. See 26.1.4.1 Public ROM Memory Map of the AM335X TRM.
+
+Information on vector behavior and exception handling can be found in B1.8 Exception Handling of the ARMv7 reference manual. Helpful info is also found in Chapter 11 ARM Cortex A Prog Guide v4.
+
 ## PRU
 
 The PRU has special instructions that GCC doesn't support - you have to use TI's compiler to generate the code for the PRU. See the PRU folder for additional information.
