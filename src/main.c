@@ -24,6 +24,7 @@ main(void)
 	Register_Write(GPIO1, GPIO_OE, 0);
 	// Register_Write(GPIO1, GPIO_DATAOUT, 1 << USR0);
 
+	// Configure PRU UART0 (different from main board UART0) pin mux.
 	HWREG(SOC_CONTROL_REGS + CONTROL_CONF_UART_RXD) = 0x4;
 	HWREG(SOC_CONTROL_REGS + CONTROL_CONF_UART_TXD) = 0x4;
 
