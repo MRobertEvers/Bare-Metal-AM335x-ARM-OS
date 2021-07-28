@@ -80,6 +80,8 @@ This means the boot media check order is (from table 26-7 of the reference manua
 4. UART0
 ```
 
+UART0 booting works well. Simply do not have an MMC in the slot when booting. With a FTDI chip, you can use XMODEM and Teraterm to download the image.
+
 ## Other
 
 Readme formalization to come.
