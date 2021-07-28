@@ -8,6 +8,16 @@ Download and install the `gcc-arm-none-eabi` toolchain for your platform - ideal
 
 # Notes:
 
+## Boot
+
+I missed this the first time around. I couldn't get the MMC boot to work with a FAT file system, but the TRM specifies this as well (it can't just be a FAT file system)
+
+```
+The detection of whether an image is present or not on a selected device depends on the first few bytes.
+On a GP Device type a booting image is considered to be present when the first four bytes of the sector is
+not equal to 0000 0000h or FFFF FFFFh
+```
+
 ## Exception Vectors
 
 The AM335x has a special table for the exception vectors. See 26.1.4.1 Public ROM Memory Map of the AM335X TRM.
